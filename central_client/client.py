@@ -22,5 +22,5 @@ class CentralClient:
         resp = await self.api.fetch_task(self.worker_id)
         return [parse_runnable_graph(x) for x in resp['tasks']]
 
-    async def report_result(self, graph_id: str, task: RunnableTask):
-        pass
+    async def report_result(self, graph_id: str, task: RunnableTask, results: Dict[str, float]):
+        await self.api.report_result(self.worker_id, task.exp_id, graph_id, task.task.task_id, results)

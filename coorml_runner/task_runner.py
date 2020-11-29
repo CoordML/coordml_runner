@@ -164,7 +164,7 @@ class TaskRunner:
         logger.info(f'Extracted task {(graph_id, task_id)} results {results}')
 
         # Report results to Central
-        # ... TODO
+        await self.client.report_result(graph_id, runnable, results)
 
         # Add task to finished queue
         await self.finish_queue.put((graph_id, task_id))
