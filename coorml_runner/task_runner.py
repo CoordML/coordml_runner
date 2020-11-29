@@ -1,6 +1,7 @@
 import os.path as osp
 from pathlib import Path
 import logging
+import parse
 import asyncio
 from central_client.client import CentralClient
 from central_client.tasks import *
@@ -131,16 +132,34 @@ class TaskRunner:
                 logger.info(f'Dispatch task: {(graph_id, task_id)} -> GPU {gpu_id}')
                 asyncio.create_task(self.run_task(graph_id, task_id, gpu_id))
 
+    def extract_task_result(self, log_env_path: str, graph_id: str, task_id: str) -> Dict[str, float]:
+        runnable = self.graphs[graph_id].nodes[task_id]
+        rule = parse.compile(runnable.result_parse)
+        log_path = osp.join(log_env_path, 'log')
+
+        with open(log_path, 'r') as f:
+            lines = reversed(f.readlines())
+            for line in lines:
+                res = rule.parse(line)
+                if res is not None:
+                    return res.named
+
+        return dict()
+
     async def run_task(self, graph_id: str, task_id: str, gpu_id: int):
         runnable = self.graphs[graph_id].nodes[task_id]
         log_env_path = self.prepare_env(graph_id, runnable, gpu_id)
         script_path = osp.join(log_env_path, 'run.sh')
         proc = await asyncio.create_subprocess_exec('sh', script_path, stdout=asyncio.subprocess.PIPE,
                                                     stderr=asyncio.subprocess.PIPE)
-        logger.info(f'Task {(graph_id, task_id)} started with PID {proc.pid}')
+        logger.info(f'Task {(graph_id, task_id)} started with PID {proc.pid}, args {self.graphs[graph_id].nodes[task_id].task.args}')
         stdout, stderr = await proc.communicate()
         stdout = stdout.decode() if stdout else '[EMPTY]'
         stderr = stderr.decode() if stderr else '[EMPTY]'
         logger.info(f'Task {(graph_id, task_id)} finished with stdout {stdout} stderr {stderr}')
 
         # Try to extract log
+        results = self.extract_task_result(log_env_path, graph_id, task_id)
+        logger.info(f'Extracted task {(graph_id, task_id)} results {results}')
+
+        # Report results to Central
