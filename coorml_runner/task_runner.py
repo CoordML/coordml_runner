@@ -63,6 +63,7 @@ class TaskRunner:
     async def run(self):
         while True:
             await asyncio.sleep(1.0)
+            await self.handle_finished_tasks()
             await self.fetch_new_tasks()
             await self.add_ready_tasks()
             await self.dispatch_ready_tasks()
@@ -163,3 +164,17 @@ class TaskRunner:
         logger.info(f'Extracted task {(graph_id, task_id)} results {results}')
 
         # Report results to Central
+        # ... TODO
+
+        # Add task to finished queue
+        await self.finish_queue.put((graph_id, task_id))
+
+    async def handle_finished_tasks(self):
+        while not self.finish_queue.empty():
+            graph_id, task_id = self.finish_queue.get_nowait()
+
+            # remove from gpu assignments
+            self.gpu_assignments.pop((graph_id, task_id))
+
+            # change task status
+            self.graphs[graph_id].nodes[task_id].task.status = TaskStatus.DONE
