@@ -35,5 +35,5 @@ def parse_runnable_graph(obj: dict) -> RunnableGraph:
     return RunnableGraph(
         graph_id=obj['graphId'],
         nodes=[parse_runnable_task(x) for x in obj['nodes']],
-        dependencies=[parse_dependencies(x) for x in obj['dependencies']]
+        dependencies=parse_dependencies(obj['dependencies'])
     )

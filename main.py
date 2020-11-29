@@ -12,6 +12,6 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO)
     config = load_config(args.config)
-    entry = Entry(api_endpoint=config['api_endpoint'], runner_name=config['name'])
+    entry = Entry(config)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(entry.start())
