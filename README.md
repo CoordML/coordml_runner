@@ -1,2 +1,2 @@
-# coordml_runner
- A Python Implementation of CoordML Runner
+# CoordML *Runner*
+ A Python implementation of CoordML runner.
