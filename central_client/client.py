@@ -22,15 +22,5 @@ class CentralClient:
         resp = await self.api.fetch_task(self.worker_id)
         return [parse_runnable_graph(x) for x in resp['tasks']]
 
-
-async def main():
-    api = CentralAPI()
-    worker_id = await api.register('Runner 127.0.0.1')
-    status = GpuStatus().get_info()
-    print(await api.report_gpu(worker_id['workerId'], status))
-    print(await api.worker_list())
-    print(await api.fetch_task(worker_id['workerId']))
-
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    async def report_result(self, graph_id: str, task: RunnableTask):
+        pass
