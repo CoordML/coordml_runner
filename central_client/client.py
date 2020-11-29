@@ -1,15 +1,8 @@
 import aiohttp
 import asyncio
 from central_client.api import CentralAPI
+from central_client.tasks import *
 from gpu_status import GpuStatus, GpuInfo
-from collections import namedtuple
-from typing import Tuple
-
-
-Dependency = Tuple[str, str]
-Task = namedtuple('Task', ['args', 'executable', 'meta', 'status', 'task_id'])
-RunnableTask = namedtuple('RunnableTask', ['env_path', 'exp_id', 'result_parse', 'task'])
-RunnableGraph = namedtuple('RunnableGraph', ['graph_id', 'nodes', 'dependencies'])
 
 
 class CentralClient:
@@ -24,6 +17,10 @@ class CentralClient:
 
     async def report_gpu(self, gpu_status: GpuInfo):
         await self.api.report_gpu(self.worker_id, gpu_status)
+
+    async def fetch_tasks(self) -> List[RunnableGraph]:
+        resp = await self.api.fetch_task(self.worker_id)
+        return [parse_runnable_graph(x) for x in resp['tasks']]
 
 
 async def main():
