@@ -10,7 +10,10 @@ class Entry:
         self.client = CentralClient(name=config['name'], api_endpoint=config['api_endpoint'])
         self.gpu_status = GpuStatus(gpu_mode)
         self.gpu_report = GpuReport(client=self.client, gpu_status=self.gpu_status)
-        self.task_runner = TaskRunner(client=self.client, runner_config=config['runner'])
+        self.task_runner = TaskRunner(client=self.client,
+                                      gpu_status=self.gpu_status,
+                                      log_path=config['log_path'],
+                                      runner_config=config['runner'])
 
     async def start(self):
         await self.client.register()

@@ -1,11 +1,32 @@
 from collections import namedtuple
-from typing import Tuple, List
+from typing import Tuple, List, Dict, Union
 
 
 Dependency = Tuple[str, str]
-Task = namedtuple('Task', ['args', 'executable', 'meta', 'status', 'task_id'])
-RunnableTask = namedtuple('RunnableTask', ['env_path', 'exp_id', 'result_parse', 'task'])
-RunnableGraph = namedtuple('RunnableGraph', ['graph_id', 'nodes', 'dependencies'])
+
+
+class Task:
+    def __init__(self, args: Dict[str, str], executable: str, meta: Dict[str, str], status, task_id: str):
+        self.task_id = task_id
+        self.executable = executable
+        self.args = args
+        self.meta = meta
+        self.status = status
+
+
+class RunnableTask:
+    def __init__(self, exp_id: str, env_path: str, result_parse: str, task: Task):
+        self.exp_id = exp_id
+        self.env_path = env_path
+        self.result_parse = result_parse
+        self.task = task
+
+
+class RunnableGraph:
+    def __init__(self, graph_id: str, nodes: Union[List[RunnableTask], Dict[str, RunnableTask]], dependencies: List[Dependency]):
+        self.graph_id = graph_id
+        self.nodes = nodes
+        self.dependencies = dependencies
 
 
 def parse_task(obj: dict) -> Task:
