@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name="coordml_runner",
-    version="0.0.4",
+    version="0.1.0",
     author="Yichen Xu",
     author_email="yichen.xu@monad.email",
     description="Python CoordML Runner",

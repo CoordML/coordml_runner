@@ -1,4 +1,6 @@
 import os.path as osp
+import os
+import signal
 from pathlib import Path
 import logging
 import parse
@@ -64,7 +66,9 @@ class TaskRunner:
     def kill_child(self):
         print('killing subprocesses')
         for proc in self.procs.values():
-            proc.kill()
+            print(f'kill process {proc.pid}')
+            os.kill(proc.pid, signal.SIGTERM)
+            os.kill(proc.pid, signal.SIGKILL)
 
     async def run(self):
         while True:
@@ -116,7 +120,7 @@ class TaskRunner:
         script_path = osp.join(log_env_path, 'run.sh')
 
         cmd = f'{cmd} 2> {stderr_path} 1> {log_path}'
-        cmd = f'cd {task.env_path}\n{cmd}'
+        cmd = f'cd {task.env_path}\nexec {cmd}'
 
         with open(script_path, 'w') as f:
             f.write(cmd)
