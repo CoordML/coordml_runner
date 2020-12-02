@@ -61,14 +61,14 @@ class TaskRunner:
         self.finish_queue = asyncio.Queue(maxsize=-1)
         self.ready_queue = asyncio.Queue(maxsize=-1)
         self.gpu_assignments: Dict[TaskIdentifier, int] = dict()
-        self.procs: dict = dict()
+        self.pids: list = []
 
     def kill_child(self):
-        print('killing subprocesses')
-        for proc in self.procs.values():
-            print(f'kill process {proc.pid}')
-            os.kill(proc.pid, signal.SIGTERM)
-            os.kill(proc.pid, signal.SIGKILL)
+        print(f'killing subprocesses: {self.pids}')
+        for pid in self.pids:
+            print(f'kill process {pid}')
+            os.kill(pid, signal.SIGTERM)
+            os.kill(pid, signal.SIGKILL)
 
     async def run(self):
         while True:
@@ -164,10 +164,9 @@ class TaskRunner:
         script_path = osp.join(log_env_path, 'run.sh')
         proc = await asyncio.create_subprocess_exec('sh', script_path, stdout=asyncio.subprocess.PIPE,
                                                     stderr=asyncio.subprocess.PIPE)
-        self.procs[(graph_id, task_id)] = proc
+        self.pids.append(proc.pid)
         logger.info(f'Task {(graph_id, task_id)} started with PID {proc.pid}, args {self.graphs[graph_id].nodes[task_id].task.args}')
         stdout, stderr = await proc.communicate()
-        self.procs.pop((graph_id, task_id))
         stdout = stdout.decode() if stdout else '[EMPTY]'
         stderr = stderr.decode() if stderr else '[EMPTY]'
         logger.info(f'Task {(graph_id, task_id)} finished with stdout {stdout} stderr {stderr}')
