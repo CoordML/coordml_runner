@@ -8,3 +8,9 @@ runner:
   min_gpu_mem: 0.0
 
 log_path: ~/.coordml
+
+gpu_mode:
+  fake: true
+  gpu_num: 4
+  gpu_name: Titan Xp
+  gpu_mem: 31300

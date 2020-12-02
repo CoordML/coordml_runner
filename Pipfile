@@ -9,6 +9,7 @@ verify_ssl = true
 aiohttp = "*"
 pyyaml = "*"
 parse = "*"
+gpustat = "*"
 
 [requires]
 python_version = "3.8"

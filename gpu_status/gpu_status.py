@@ -2,6 +2,7 @@ from enum import Enum
 from collections import namedtuple
 from typing import List
 import random
+from gpustat.core import GPUStatCollection
 
 
 class GpuStatusMode(Enum):
@@ -15,11 +16,14 @@ GpuInfo = List[GpuState]
 
 
 class GpuStatus:
-    def __init__(self, mode: GpuStatusMode = GpuStatusMode.FAKE):
-        self.mode = mode
-        self.fake_gpu_name = 'Titan XP'
-        self.fake_gpu_mem = 32.0
-        self.fake_gpu_count = 8
+    def __init__(self, config: dict):
+        if config['fake']:
+            self.mode = GpuStatusMode.FAKE
+            self.fake_gpu_name = config['gpu_name']
+            self.fake_gpu_mem = config['gpu_mem']
+            self.fake_gpu_count = config['gpu_num']
+        else:
+            self.mode = GpuStatusMode.GPU_STAT
 
     def _generate_fake_state(self):
         mem_load = random.random()
@@ -29,8 +33,13 @@ class GpuStatus:
     def get_info_fake(self) -> GpuInfo:
         return [self._generate_fake_state() for _ in range(self.fake_gpu_count)]
 
+    def get_info_gpustat(self) -> GpuInfo:
+        stat = GPUStatCollection.new_query().jsonify()
+        return [GpuState(name=obj['name'], memMax=obj['memory.total'], memNow=obj['memory.used'], load=obj['utilization.gpu'])
+                for obj in stat['gpus']]
+
     def get_info(self) -> GpuInfo:
         if self.mode == GpuStatusMode.FAKE:
             return self.get_info_fake()
         else:
-            raise NotImplementedError
+            return self.get_info_gpustat()
