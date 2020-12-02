@@ -35,7 +35,7 @@ class GpuStatus:
 
     def get_info_gpustat(self) -> GpuInfo:
         stat = GPUStatCollection.new_query().jsonify()
-        return [GpuState(name=obj['name'], memMax=obj['memory.total'], memNow=obj['memory.used'], load=obj['utilization.gpu'])
+        return [GpuState(name=obj['name'], memMax=obj['memory.total'] / 1e3, memNow=obj['memory.used'] / 1e3, load=obj['utilization.gpu'])
                 for obj in stat['gpus']]
 
     def get_info(self) -> GpuInfo:

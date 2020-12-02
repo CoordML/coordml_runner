@@ -6,9 +6,9 @@ from coorml_runner.task_runner import TaskRunner
 
 
 class Entry:
-    def __init__(self, config, gpu_mode: GpuStatusMode = GpuStatusMode.FAKE):
+    def __init__(self, config):
         self.client = CentralClient(name=config['name'], api_endpoint=config['api_endpoint'])
-        self.gpu_status = GpuStatus(gpu_mode)
+        self.gpu_status = GpuStatus(config['gpu_mode'])
         self.gpu_report = GpuReport(client=self.client, gpu_status=self.gpu_status)
         self.task_runner = TaskRunner(client=self.client,
                                       gpu_status=self.gpu_status,
