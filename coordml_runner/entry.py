@@ -3,6 +3,8 @@ from gpu_status import GpuStatus, GpuStatusMode
 from central_client.client import CentralClient
 from coordml_runner.gpu_report import GpuReport
 from coordml_runner.task_runner import TaskRunner
+import sys
+import atexit
 
 
 class Entry:
@@ -15,6 +17,8 @@ class Entry:
                                       log_path=config['log_path'],
                                       runner_config=config['runner'])
 
+        atexit.register(self.task_runner.kill_child)
+
     async def start(self):
         await self.client.register()
         print(f'Runner registered, id {self.client.worker_id}')
@@ -23,4 +27,9 @@ class Entry:
         task_runner = asyncio.create_task(self.task_runner.run())
         print(f'TaskRunner module spawned')
         print(f'Runner started')
-        await asyncio.gather(gpu_report_task, task_runner)
+        try:
+            await asyncio.gather(gpu_report_task, task_runner)
+        except Exception as e:
+            print(f'Got exception {e}, terminating')
+            self.task_runner.kill_child()
+            sys.exit(0)
