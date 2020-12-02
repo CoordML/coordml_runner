@@ -1,6 +1,6 @@
 import asyncio
-from coorml_runner.entry import Entry
-from coorml_runner.config import load_config
+from coordml_runner.entry import Entry
+from coordml_runner.config import load_config
 import logging
 import argparse
 

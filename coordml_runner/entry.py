@@ -1,8 +1,8 @@
 import asyncio
 from gpu_status import GpuStatus, GpuStatusMode
 from central_client.client import CentralClient
-from coorml_runner.gpu_report import GpuReport
-from coorml_runner.task_runner import TaskRunner
+from coordml_runner.gpu_report import GpuReport
+from coordml_runner.task_runner import TaskRunner
 
 
 class Entry:

@@ -1,4 +1,4 @@
-from coorml_runner.cli import main
+from coordml_runner.cli import main
 
 if __name__ == '__main__':
     main()
