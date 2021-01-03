@@ -6,6 +6,7 @@ runner:
   max_tasks_per_gpu: 2
   max_gpu_load: 1.0
   min_gpu_mem: 0.0
+  use_gpu_indices: *
 
 log_path: ~/.coordml
 

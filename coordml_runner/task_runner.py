@@ -8,7 +8,7 @@ import asyncio
 from central_client.client import CentralClient
 from central_client.tasks import *
 from gpu_status import GpuStatus
-from typing import Dict
+from typing import Dict, List, Optional
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -47,6 +47,14 @@ def extract_ready_nodes(task_graph: RunnableGraph) -> List[TaskIdentifier]:
     return ret
 
 
+def extract_gpu_indices(conf: str) -> Optional[List[int]]:
+    if conf == '*':
+        return None
+    else:
+        return [int(x) for x in conf.split(',')]
+
+
+
 class TaskRunner:
     def __init__(self, client: CentralClient, gpu_status: GpuStatus, log_path: str, runner_config: dict):
         self.client = client
@@ -56,6 +64,7 @@ class TaskRunner:
         self.max_tasks_per_gpu = runner_config['max_tasks_per_gpu']
         self.max_gpu_load = runner_config['max_gpu_load']
         self.min_gpu_mem = runner_config['min_gpu_mem']
+        self.use_gpu_indices = runner_config['use_gpu_indices']
 
         self.graphs: GraphMapping = dict()
         self.finish_queue = asyncio.Queue(maxsize=-1)
@@ -110,7 +119,8 @@ class TaskRunner:
         ret = []
         for gpu_id in range(num_gpus):
             if num_tasks[gpu_id] < self.max_tasks_per_gpu and gpu_info[gpu_id].load < self.max_gpu_load and \
-                    (gpu_info[gpu_id].memMax - gpu_info[gpu_id].memNow) > self.min_gpu_mem:
+                    (gpu_info[gpu_id].memMax - gpu_info[gpu_id].memNow) > self.min_gpu_mem and \
+                    (self.use_gpu_indices is None or gpu_id in self.use_gpu_indices):
                 ret.append(gpu_id)
         return ret
 
