@@ -67,8 +67,12 @@ class TaskRunner:
         print(f'killing subprocesses: {self.pids}')
         for pid in self.pids:
             print(f'kill process {pid}')
-            os.kill(pid, signal.SIGTERM)
-            os.kill(pid, signal.SIGKILL)
+            try:
+                os.kill(pid, signal.SIGTERM)
+                os.kill(pid, signal.SIGKILL)
+            except:
+                print(f'kill process {pid} failed, ignore')
+                pass
 
     async def run(self):
         while True:
